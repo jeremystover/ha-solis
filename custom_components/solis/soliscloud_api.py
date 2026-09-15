@@ -362,7 +362,10 @@ class SoliscloudAPI(BaseAPI):
                         _LOGGER.debug(
                             "No plant name for inverter %s, keeping it anyway", inv
                         )
-                        if self._plant_name is None:
+                        # SoliscloudAPI.__init__ does not call super().__init__(),
+                        # so _plant_name may never have been set. Upstream only
+                        # ever assigns it, so this never bit them.
+                        if getattr(self, "_plant_name", None) is None:
                             self._plant_name = str(self.config.plant_id)
                     else:
                         _LOGGER.info("No access to inverter %s, removing", inv)
