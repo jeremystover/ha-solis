@@ -6,3 +6,8 @@ correct_daily_on_grid_energy_enabled: false
 #alternatively use energy today from plant, as it is the sum of all #inverters 
 #registered under the plant it can only be used with single inverter per plant
 use_energy_today_from_plant: false
+#SolisCloud's stationDetail endpoint can time out while inverterDetail still
+#answers. The plant name is only read from stationDetail, and an inverter with
+#no plant name is normally discarded, taking all of its sensors with it. Set
+#this to keep those inverters.
+keep_inverter_without_plant_name: true

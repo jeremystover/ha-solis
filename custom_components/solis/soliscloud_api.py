@@ -353,8 +353,20 @@ class SoliscloudAPI(BaseAPI):
                 try:
                     self._plant_name = getattr(data, INVERTER_PLANT_NAME)
                 except AttributeError:
-                    _LOGGER.info("No access to inverter %s, removing", inv)
-                    del self._inverter_list[inv]
+                    # plantName comes from stationDetail. When that endpoint is
+                    # timing out but inverterDetail still answers, dropping the
+                    # inverter loses every sensor it could still provide, and
+                    # the plant name is only ever used to title the config
+                    # entry. This workaround keeps the inverter instead.
+                    if self.config.workarounds.get("keep_inverter_without_plant_name", False):
+                        _LOGGER.debug(
+                            "No plant name for inverter %s, keeping it anyway", inv
+                        )
+                        if self._plant_name is None:
+                            self._plant_name = str(self.config.plant_id)
+                    else:
+                        _LOGGER.info("No access to inverter %s, removing", inv)
+                        del self._inverter_list[inv]
             if len(self._inverter_list) == 0:
                 _LOGGER.warning("No valid inverters found, login failed")
                 self._is_online = False

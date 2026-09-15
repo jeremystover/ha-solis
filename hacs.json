@@ -1,7 +1,9 @@
 {
-  "name": "SolisCloud portal integration",
+  "name": "SolisCloud portal integration (patched fork)",
   "content_in_root": false,
   "render_readme": false,
   "homeassistant": "2024.9.0",
-  "domains": ["sensor"]
+  "domains": [
+    "sensor"
+  ]
 }

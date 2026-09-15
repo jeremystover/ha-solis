@@ -1,3 +1,49 @@
+# Patched fork of solis-sensor
+
+A fork of [hultenvp/solis-sensor](https://github.com/hultenvp/solis-sensor) carrying one
+change. Upstream's own README follows below the rule.
+
+## What it fixes
+
+SolisCloud's `/v1/api/stationDetail` endpoint can time out for hours or days while
+`/v1/api/inverterDetail` keeps answering normally. The integration reads the plant name
+only from `stationDetail`, and `login()` deletes any inverter whose plant name is
+missing, taking every sensor that inverter could still provide. The log reports it as:
+
+    No access to inverter <serial>, removing
+    No valid inverters found, login failed
+
+That reads like a credential fault, but it is not. The login itself succeeded, and the
+inverter list came back complete. Only the station call failed.
+
+The plant name is used in exactly one place in the integration: titling the config entry
+when it is first created. Nothing reads it afterwards, so the check is a liveness proxy
+rather than a real dependency.
+
+## The change
+
+A new flag in `workarounds.yaml`, alongside the two the author already ships:
+
+    keep_inverter_without_plant_name: true
+
+With it set, an inverter missing only its plant name is kept rather than deleted, and the
+plant id stands in for the name. Everything served by `inverterDetail` keeps working:
+per-inverter AC and DC power, per-string values, energy today, energy total. Plant-level
+figures (plant consumption power, grid purchased and sold totals) stay unavailable until
+SolisCloud's station endpoint recovers, because there is no other source for them.
+
+Set the flag back to `false` to get stock upstream behaviour.
+
+## Staying current with upstream
+
+    git remote add upstream https://github.com/hultenvp/solis-sensor.git
+    git fetch upstream
+    git rebase upstream/master
+
+If upstream fixes this itself, drop the fork and point HACS back at the original.
+
+---
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 >❗As from release 4.0.0 the legacy Ginlong v2 API support has been removed. If you still use the integration for some MyEvolvecloud legacy endpoint using the v2 API then stick to the v3.x versions or fork
