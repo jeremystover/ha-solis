@@ -34,6 +34,26 @@ SolisCloud's station endpoint recovers, because there is no other source for the
 
 Set the flag back to `false` to get stock upstream behaviour.
 
+## The request timeout
+
+Upstream gives every API request a fixed 10 seconds, in two `async_timeout.timeout(10)`
+calls. SolisCloud is frequently slower than that. Measured against a live account with
+curl, while Home Assistant was reporting the integration as completely broken:
+
+    userStationList   10.41s
+    inverterList      17.78s
+    stationDetail      5.68s
+    inverterDetail     3.42s / 3.60s / 9.88s
+
+Every call succeeded. Two exceeded the ceiling, so the integration recorded them as
+`TimeoutError`, discarded the inverters, and logged `No valid inverters found, login
+failed`. The API was working the whole time.
+
+The timeout is now read from `workarounds.yaml` and defaults to upstream's 10 if the key
+is absent:
+
+    http_timeout: 30
+
 ## Staying current with upstream
 
     git remote add upstream https://github.com/hultenvp/solis-sensor.git

@@ -11,3 +11,9 @@ use_energy_today_from_plant: false
 #no plant name is normally discarded, taking all of its sensors with it. Set
 #this to keep those inverters.
 keep_inverter_without_plant_name: true
+#SolisCloud regularly takes longer to answer than the 10 seconds this
+#integration allowed, which surfaces as TimeoutError and then the misleading
+#"No valid inverters found, login failed". Measured against a live account:
+#userStationList 10.4s, inverterList 17.8s, stationDetail 5.7s, inverterDetail
+#3.4-9.9s. Seconds allowed per request; upstream's fixed value was 10.
+http_timeout: 30
